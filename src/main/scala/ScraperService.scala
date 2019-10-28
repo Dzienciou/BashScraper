@@ -1,28 +1,14 @@
-import java.io.{File, FileOutputStream, OutputStreamWriter, PrintWriter}
-
 import nl.grons.metrics4.scala.DefaultInstrumented
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters._
-import scala.concurrent.duration._
 
-object Utils extends DefaultInstrumented {
+object ScraperService extends DefaultInstrumented {
 
   val loading = metrics.timer("loading")
-
-  def printToFile(filename: String, content: String) = {
-    val file        = new FileOutputStream(new File(filename))
-    val printWriter = new PrintWriter(new OutputStreamWriter(file, "UTF-8"))
-    try {
-      printWriter.print(content)
-    } finally {
-      printWriter.close()
-    }
-  }
 
   def fetchPage(i: Int, ws: StandaloneAhcWSClient, url: String)(implicit ex: ExecutionContext) = {
     loading.timeFuture(
@@ -41,9 +27,8 @@ object Utils extends DefaultInstrumented {
       id     <- post.select("a.qid").first.text.drop(1).toLongOption
       points <- post.select("span.points").first.text.toLongOption
     } yield {
-      Entry(id, points, post.select("div.post-content").first.text)
+      val a = post.select("div.post-content").first.html()
+      Post(id, points, a)
     }
   }
-
-  def formatTime(time: Double) = Duration(time, NANOSECONDS).toMillis
 }

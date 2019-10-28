@@ -16,10 +16,14 @@ object ScraperService extends DefaultInstrumented {
     )
   }
 
-  def parsePage(page: String) = {
-    Jsoup.parse(page).select("div.post").iterator.asScala.toSeq.map(parsePost) collect {
+  def parse(page: String) = {
+    parsePage(page).map(parsePost) collect {
       case Some(p) => p
     }
+  }
+
+  def parsePage(page: String) = {
+    Jsoup.parse(page).select("div.post").iterator.asScala.toSeq
   }
 
   def parsePost(post: Element) = {

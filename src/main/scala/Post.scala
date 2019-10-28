@@ -11,14 +11,15 @@ object Post {
   implicit val postWrites = new Writes[Post] {
     def writes(post: Post): JsValue = {
       Json.obj(
-        "id" -> JsNumber(post.id),
+        "id"     -> JsNumber(post.id),
         "points" -> JsNumber(post.points),
-        "text" -> JsString(parse(post.content))
+        "text"   -> JsString(parse(post.content))
       )
     }
   }
 
   private def parse(text: String) =
-    text.replace("&gt;", ">")
+    text
+      .replace("&gt;", ">")
       .replace("&lt;", "<")
 }

@@ -19,8 +19,12 @@ object Scraper {
   def main(args: Array[String]) = {
 
     val pagesCount: Int = args.headOption.flatMap(_.toIntOption).getOrElse(1)
-    val fetchedPosts    = Future.traverse(1 to pagesCount)(i => ScraperService.fetchPage(i, ws, url)
-      .map(ScraperService.parse))
+    val fetchedPosts = Future.traverse((1 to pagesCount).toList)(
+      i =>
+        ScraperService
+          .fetchPage(i, ws, url)
+          .map(ScraperService.parse)
+    )
 
     val posts = Await.result(fetchedPosts, Duration.Inf)
     Helpers.printToFile(outputPath, Json.prettyPrint(Json.toJson(posts.flatten)))
